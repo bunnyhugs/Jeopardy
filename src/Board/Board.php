@@ -128,6 +128,8 @@ class Board
     {
         //TODO what if we can't find anything? what if either of these return empty. Must throw exceptions, I suppose.
 
+		echo "Category: " . $categoryName . ", value: " . $value . "\n";
+
         /** @var Category $category */
         $category = $this->categories->first(function (Category $category) use ($categoryName) {
             return $category->getName() == $categoryName;
