@@ -242,7 +242,7 @@ class Server
 
             if (!$finalJeopardy->hasAnswer($event->getContestant())) {
                 //TODO logging
-                $response = new FinalJeopardyQuestionResponse($event->getContestant(), 0, "No answer, Troy");
+                $response = new FinalJeopardyQuestionResponse($event->getContestant(), 0, "No answer");
                 $wamp->onFinalJeopardyResponse($response);
                 return;
             }
