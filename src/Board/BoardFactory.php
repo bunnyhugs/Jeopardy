@@ -46,9 +46,70 @@ class BoardFactory
                     if (!file_exists($path)) throw new FileNotFoundException("Could not find the file at path {$path}");
                 }
 
-                return self::fromJson(file_get_contents($path));
+				// Load contestants from discrete file
+				$contestantsPath = $this->game_data_path . "contestants.json";
+				$contestantsJson = file_get_contents($contestantsPath);
+				$json = file_get_contents($path);
+				return self::fromJsonWithContestants($json, $contestantsJson);
             break;
         }
+    }
+
+    /**
+     * @param string $json
+     * @return Board
+     */
+    public function fromJsonWithContestants($json, $contestantsJson)
+    {
+        $contestantFactory = new ContestantFactory();
+
+        $values = json_decode($json);
+        $contestantsValues = json_decode($contestantsJson);
+        $contestants = (new Collection($contestantsValues->contestants))->map([ $contestantFactory, 'createFromObject' ]);
+	
+        $categories = array_map(
+            function (\stdClass $category) {
+                return new Category(
+                    $category->name,
+                    array_map(
+                        function (\stdClass $question) {
+                            $questionObj = new Question(
+                                new Clue($question->clue),
+                                new Answer($question->answer),
+                                $question->value,
+                                (isset($question->daily_double)) ? $question->daily_double : false,
+                                (isset($question->type)) ? $question->type : Question::CLUE_TYPE_DEFAULT
+                            );
+                            if ($questionObj->getClue() == null || (isset($question->used) && $question->used)) {
+                                $questionObj->setUsed(true);
+                            }
+                            return $questionObj;
+                        },
+                        $category->questions
+                    )
+                );
+            }, $values->categories
+        );
+
+        if (!isset($values->final)) {
+            throw new \Exception("Final Jeopardy is not defined in your questions file");
+        }
+
+        $finalJeopardyClue = new FinalJeopardyClue($values->final->category, $values->final->clue, $values->final->answer);
+        $finalJeopardyState = new State(
+			$finalJeopardyClue,
+			$contestants->map(function(Contestant $contestant) { return $contestant->getName(); })->toArray()
+		);
+
+        $board = new Board(
+            $contestants,
+            $categories,
+            new Resolver(),
+            new BuzzerStatus(),
+            $finalJeopardyState
+        );
+
+        return $board;
     }
 
     /**

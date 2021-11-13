@@ -6,11 +6,12 @@ use Symfony\Component\HttpFoundation\Response;
 require_once '../vendor/autoload.php';
 
 $json = json_decode(file_get_contents('../game_data/questions.json'), true);
+$contestantsJson = json_decode(file_get_contents('../game_data/contestants.json'), true);
 
 $config = [];
 $config['players'] = array_map(function(array $contestant_info) {
     return ucfirst(strtolower($contestant_info['name']));
-}, $json['contestants']);
+}, $contestantsJson['contestants']);
 
 $config['display_host'] = false;
 
