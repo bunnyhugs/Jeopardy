@@ -8,6 +8,8 @@
 
             <button class="button" id="toggle-status">Toggle</button>
             <br />
+            <button class="button timeout" id="timeout">Time out</button>
+            <br />
             <button class="button bad" id="modal-dismiss">Dismiss</button>
             <br />
             <button id="trigger-final" class="button facebook">Start Final</button>
@@ -50,7 +52,11 @@
                 jeo.attemptBuzzerStatusChange($('#status-indicator').hasClass('inactive-buzzer'));
             });
 
-            $('.question.box').click(function() {
+			$('#timeout').click(function() {
+				jeo.attemptTimeout();
+			});
+
+			$('.question.box').click(function() {
                 var categoryName = $(this).attr('data-category');
                 var value = $(this).find('.clue').first().text();
 

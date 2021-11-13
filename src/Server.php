@@ -18,6 +18,7 @@ use Depotwarehouse\Jeopardy\Board\Question\QuestionDismissalEvent;
 use Depotwarehouse\Jeopardy\Board\QuestionDisplayRequestEvent;
 use Depotwarehouse\Jeopardy\Board\QuestionNotFoundException;
 use Depotwarehouse\Jeopardy\Board\QuestionSubscriptionEvent;
+use Depotwarehouse\Jeopardy\Board\QuestionTimeoutSubscriptionEvent;
 use Depotwarehouse\Jeopardy\Buzzer\BuzzerResolution;
 use Depotwarehouse\Jeopardy\Buzzer\BuzzerResolutionEvent;
 use Depotwarehouse\Jeopardy\Buzzer\BuzzerStatus;
@@ -85,6 +86,10 @@ class Server
 
         $emitter->addListener(QuestionSubscriptionEvent::class, function(QuestionSubscriptionEvent $event) use ($wamp, $board) {
             $wamp->onQuestionSubscribe($board->getCategories(), $event->getSessionId());
+        });
+
+        $emitter->addListener(QuestionTimeoutSubscriptionEvent::class, function(QuestionTimeoutSubscriptionEvent $event) use ($wamp, $board) {
+            $wamp->onQuestionTimeoutSubscribe($event->getSessionId());
         });
 
         $emitter->addListener(ContestantScoreSubscriptionEvent::class, function(ContestantScoreSubscriptionEvent $event) use ($wamp, $board) {

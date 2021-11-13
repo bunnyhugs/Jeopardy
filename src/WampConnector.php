@@ -6,6 +6,7 @@ use Depotwarehouse\Jeopardy\Board\Category;
 use Depotwarehouse\Jeopardy\Board\Question;
 use Depotwarehouse\Jeopardy\Board\QuestionDisplayRequestEvent;
 use Depotwarehouse\Jeopardy\Board\QuestionSubscriptionEvent;
+use Depotwarehouse\Jeopardy\Board\QuestionTimeoutSubscriptionEvent;
 use Depotwarehouse\Jeopardy\Buzzer\BuzzerResolution;
 use Depotwarehouse\Jeopardy\Buzzer\BuzzerStatus;
 use Depotwarehouse\Jeopardy\Buzzer\BuzzerStatusChangeEvent;
@@ -29,6 +30,7 @@ class WampConnector implements WampServerInterface
     const QUESTION_DISPLAY_TOPIC = "com.sc2ctl.jeopardy.question_display";
     const QUESTION_DISMISS_TOPIC = "com.sc2ctl.jeopardy.question_dismiss";
     const QUESTION_ANSWER_QUESTION = "com.sc2ctl.jeopardy.question_answer";
+    const QUESTION_TIME_OUT_TOPIC = "com.sc2ctl.jeopardy.question_time_out";
     const CONTESTANT_SCORE = "com.sc2ctl.jeopardy.contestant_score";
     const DAILY_DOUBLE_BET_TOPIC = "com.sc2ctl.jeopardy.daily_double_bet";
     const FINAL_JEOPARDY_TOPIC = "com.sc2ctl.jeopardy.final_jeopardy";
@@ -68,6 +70,9 @@ class WampConnector implements WampServerInterface
         switch ((string)$topic) {
             case self::QUESTION_DISPLAY_TOPIC:
                 $this->emitter->emit(new QuestionSubscriptionEvent($this->getSessionIdFromConnection($conn)));
+                break;
+            case self::QUESTION_TIME_OUT_TOPIC:
+		// $this->emitter->emit(new QuestionTimeOutSubscriptionEvent($this->getSessionIdFromConnection($conn)));
                 break;
             case self::BUZZER_STATUS_TOPIC:
                 $this->emitter->emit(new BuzzerStatusSubscriptionEvent($this->getSessionIdFromConnection($conn)));
@@ -152,6 +157,13 @@ class WampConnector implements WampServerInterface
 
                 break;
 
+	    case self::QUESTION_TIME_OUT_TOPIC:
+		echo "beep beep beep\n";
+                $this->emitter->emit(
+				     new QuestionTimeOutSubscriptionEvent(0)
+				     );
+		break;
+	    
             case self::QUESTION_DISMISS_TOPIC:
                 if (!isset($event['category']) || !isset($event['value'])) {
                     //TODO log this
@@ -354,6 +366,22 @@ class WampConnector implements WampServerInterface
         })->toJson();
 
         $this->subscribedTopics[self::QUESTION_DISPLAY_TOPIC]->broadcast($response, [ ], [ $sessionId ]);
+    }
+
+    /**
+     * Send timeout sound cue.
+     *
+     * @param Collection $categories A collection which contains Category objects.
+     * @param string $sessionId The session ID of the user who subscribed.
+     */
+    public function onQuestionTimeoutSubscribe($sessionId)
+    {
+        if (!array_key_exists(self::QUESTION_TIME_OUT_TOPIC, $this->subscribedTopics)) {
+            return;
+        }
+
+        $this->subscribedTopics[self::QUESTION_TIME_OUT_TOPIC]->broadcast([ $sessionId ]);
+
     }
 
     /**

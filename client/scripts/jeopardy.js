@@ -7,6 +7,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
     jeopardy.question_display_topic = 'com.sc2ctl.jeopardy.question_display';
     jeopardy.question_dismiss_topic = 'com.sc2ctl.jeopardy.question_dismiss';
     jeopardy.question_answer_topic = 'com.sc2ctl.jeopardy.question_answer';
+    jeopardy.question_time_out_topic = 'com.sc2ctl.jeopardy.question_time_out';
     jeopardy.contestant_score_topic = 'com.sc2ctl.jeopardy.contestant_score';
     jeopardy.daily_double_bet_topic = "com.sc2ctl.jeopardy.daily_double_bet";
     jeopardy.final_jeopardy_topic = "com.sc2ctl.jeopardy.final_jeopardy";
@@ -28,6 +29,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
             conn.subscribe(jeopardy.question_display_topic, handleQuestionDisplay);
             conn.subscribe(jeopardy.question_dismiss_topic, handleQuestionDismiss);
             conn.subscribe(jeopardy.question_answer_topic, handleQuestionAnswer);
+            conn.subscribe(jeopardy.question_time_out_topic, handleQuestionTimeOutEvent);
             conn.subscribe(jeopardy.contestant_score_topic, handleContestantScore);
             conn.subscribe(jeopardy.daily_double_bet_topic, handleDailyDoubleBet);
             conn.subscribe(jeopardy.final_jeopardy_topic, handleFinalJeopardy);
@@ -82,6 +84,10 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
             'active': status
         };
         conn.publish(jeopardy.buzzer_status_topic, payload, [], [])
+    };
+
+    jeopardy.attemptTimeout = function () {
+        conn.publish(jeopardy.question_time_out_topic, {}, [], [])
     };
 
     jeopardy.attemptNewQuestionDisplay = function (categoryName, value) {
@@ -274,6 +280,20 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
     }
 
     /**
+     * This function is called when the admin times out a question.
+     *
+     * Just play a sound.
+     *
+     * @param topic
+     * @param data
+     */
+    function handleQuestionTimeOutEvent(topic, data) {
+        if (!jeopardy.admin_mode) {
+			jQuery('#audio-timeout')[0].play();
+		}
+    }
+
+    /**
      * This function is called whenever we receive a message that a player has answered a question.
      *
      * Note that this will simply update the players' score based on their answer, and if it was incorrect then we
@@ -360,6 +380,9 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
         }
 
         if (data.hasOwnProperty("clue")) {
+            if (!jeopardy.admin_mode) {
+				jQuery('#audio-final-jeopardy')[0].play();
+			}
             modal.find('.final-jeopardy-clue').html(data.clue);
             $('#final-jeopardy-next').attr('data-current-step', "answer");
 
@@ -631,6 +654,9 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
         if (daily_double_modal == null) {
             console.error("Could not show daily double - modal is not defined!");
         }
+        if (!jeopardy.admin_mode) {
+			jQuery('#audio-daily-double')[0].play();
+		}
         daily_double_modal.show('fast');
     }
 
