@@ -26,7 +26,7 @@ $config['players'] = array_map(function(array $contestant_info) {
 }, $contestantsJson['contestants']);
 
 $config['display_host'] = false;
-
+$config['path'] = $urlPath;
 
 $loader = new Twig_Loader_Filesystem('views');
 
@@ -35,7 +35,7 @@ $twig = new Twig_Environment($loader);
 $router = new \League\Route\RouteCollection();
 
 $router->get('/', function (Request $request, Response $response) use ($twig, $config) {
-    $response->setContent($twig->render('index.html.twig', [ 'players' => $config['players'] ]));
+    $response->setContent($twig->render('index.html.twig', [ 'players' => $config['players'], 'path' => $config['path'] ]));
     return $response;
 });
 
@@ -47,7 +47,7 @@ $router->get('/obs', function (Request $request, Response $response, array $args
     $response->setContent(
         $twig->render(
             'obs.html.twig',
-            [ 'players' => $config['players'], 'display_host' => $config['display_host'] ]
+            [ 'players' => $config['players'], 'display_host' => $config['display_host'], 'path' => $config['path'] ]
         )
     );
     return $response;
@@ -57,7 +57,7 @@ $router->get('/board', function (Request $request, Response $response, array $ar
 
     $response->setContent(
         $twig->render(
-            'board.html.twig'
+            'board.html.twig', [ 'path' => $config['path'], 'path' => $config['path'] ]
         )
     );
 
@@ -68,7 +68,7 @@ $router->get('/contestants', function (Request $request, Response $response, arr
     $response->setContent(
         $twig->render(
             'contestants.html.twig',
-            [ 'players' => $config['players'] ]
+            [ 'players' => $config['players', 'path' => $config['path'] ]
         )
     );
 
@@ -81,12 +81,12 @@ $router->get('/play/{player}', function (Request $request, Response $response, a
     if (!in_array($player, $config['players'])) {
         return new \Symfony\Component\HttpFoundation\RedirectResponse('/');
     }
-    $response->setContent($twig->render('play.html.twig', [ 'players' => $config['players'], 'user' => $player ]));
+    $response->setContent($twig->render('play.html.twig', [ 'players' => $config['players'], 'user' => $player, 'path' => $config['path'] ]));
     return $response;
 });
 
 $router->addRoute('GET', '/admin', function (Request $request, Response $response) use ($twig, $config) {
-    $response->setContent($twig->render('admin.html.twig', [ 'players' => $config['players'] ]));
+    $response->setContent($twig->render('admin.html.twig', [ 'players' => $config['players'], 'path' => $config['path'] ]));
     return $response;
 });
 
