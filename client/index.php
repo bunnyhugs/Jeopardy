@@ -5,6 +5,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 require_once '../vendor/autoload.php';
 
+$urlPath = dirname($_SERVER['PHP_SELF']);
+if ($urlPath != '/') {
+    // add trailing slash
+    $urlPath = $urlPath . "/";
+}
+
+$pos = strrpos($urlPath, "client/");
+if ($pos !== false) {
+    $urlPath = substr($urlPath, 0, $pos);
+    $urlPath .= "client/";
+}
+
 $json = json_decode(file_get_contents('../game_data/questions.json'), true);
 $contestantsJson = json_decode(file_get_contents('../game_data/contestants.json'), true);
 

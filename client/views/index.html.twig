@@ -5,7 +5,7 @@
     <div style="text-align: center">
         <h1>Choose a player:</h1>
         {% for player in players %}
-            <a class="player-choice" href="/play/{{ player }}">
+            <a class="player-choice" href="{{ path }}play/{{ player }}">
                 <div class="player-select">
                     <h2>{{ player }}</h2>
                 </div>
@@ -14,7 +14,7 @@
 
         <hr />
 
-        <h1><a href="/obs">I'm just watching</a></h1>
+        <h1><a href="{{ path }}obs">I'm just watching</a></h1>
     </div>
 
 {% endblock %}

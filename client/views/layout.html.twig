@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="/css/all.css" />
     <link href='//fonts.googleapis.com/css?family=Slabo+27px' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="{{ path }}css/all.css" />
 </head>
 <body>
-<script src="/scripts/quickfit.js"></script>
-<script src="/scripts/autobahn.min.js"></script>
-<script src="/scripts/buzzer.js"></script>
-<script src="/scripts/question.js"></script>
-<script src="/scripts/jeopardy.js"></script>
-
 <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
-<audio id="audio-timeout" src="/jeop/client/audio/times-up.mp3"></audio>
-<audio id="audio-daily-double" src="/jeop/client/audio/daily-double.mp3"></audio>
-<audio id="audio-final-jeopardy" src="/jeop/client/audio/final-jeopardy.mp3"></audio>
+<script src="{{ path }}scripts/quickfit.js"></script>
+<script src="{{ path }}scripts/autobahn.min.js"></script>
+<script src="{{ path }}scripts/buzzer.js"></script>
+<script src="{{ path }}scripts/question.js"></script>
+<script src="{{ path }}scripts/jeopardy.js"></script>
+<audio id="audio-timeout" src="{{ path }}audio/times-up.mp3"></audio>
+<audio id="audio-daily-double" src="{{ path }}audio/daily-double.mp3"></audio>
+<audio id="audio-final-jeopardy" src="{{ path }}audio/final-jeopardy.mp3"></audio>
 <style>
     .clue {
         font-size: 48px;
