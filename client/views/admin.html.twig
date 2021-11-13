@@ -113,7 +113,12 @@
             });
 
             $('#final-jeopardy-next').click(function() {
-                var current_step = $(this).attr('data-current-step');
+				var current_step = $(this).attr('data-current-step');
+				if (current_step == "clue") {
+					$(this).html("Clue displayed, wait 30s for answers");
+				} else if (current_step == "answer") {
+					$(this).html("Answers closed, gathering responses");
+				}
                 jeo.attemptFinalJeopardyDisplay(current_step);
             });
 
