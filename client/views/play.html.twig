@@ -58,7 +58,7 @@
         });
 
         $(document).keydown(function(event) {
-            if (event.keyCode == 74) {
+            if ((event.keyCode == 74) || (event.keyCode == 32)) {
                 jeo.attemptBuzz("{{ user }}");
             }
         });
