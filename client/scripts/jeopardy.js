@@ -275,6 +275,8 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
         blankOutQuestionBox(data.category, data.value);
         hideQuestion(jeopardy.getQuestionDisplayModal());
 
+		jQuery('div.answer div.content').attr("style","color: #00 !important");
+	
         question.clear();
         buzzer.deactivate(jeopardy.getStatusIndicatorElement());
     }
