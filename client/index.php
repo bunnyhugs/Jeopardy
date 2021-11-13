@@ -57,7 +57,7 @@ $router->get('/board', function (Request $request, Response $response, array $ar
 
     $response->setContent(
         $twig->render(
-            'board.html.twig', [ 'path' => $config['path'], 'path' => $config['path'] ]
+            'board.html.twig', [ 'path' => $config['path'] ]
         )
     );
 
@@ -68,7 +68,7 @@ $router->get('/contestants', function (Request $request, Response $response, arr
     $response->setContent(
         $twig->render(
             'contestants.html.twig',
-            [ 'players' => $config['players', 'path' => $config['path'] ]
+            [ 'players' => $config['players'], 'path' => $config['path'] ]
         )
     );
 
