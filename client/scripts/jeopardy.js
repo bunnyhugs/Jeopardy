@@ -686,11 +686,13 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
      * @param add
      */
     function updateContestantScore(contestant, score, add) {
+		player = $(document).find("[data-player-name='" + contestant + "']");
+		
         if (add) {
-            var curScore = parseInt($('.player.' + contestant).find('.score').html());
+            var curScore = parseInt(player.find('.score').html());
             score = curScore + parseInt(score);
         }
-        $('.player.' + contestant).find('.score').first().html(score);
+        player.find('.score').first().html(score);
     }
 
     return jeopardy;

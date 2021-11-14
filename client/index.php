@@ -76,7 +76,7 @@ $router->get('/contestants', function (Request $request, Response $response, arr
 });
 
 $router->get('/play/{player}', function (Request $request, Response $response, array $args) use ($twig, $config) {
-    $player = ucfirst(strtolower($args['player']));
+    $player = urldecode(ucfirst(strtolower($args['player'])));
 
     if (!in_array($player, $config['players'])) {
         return new \Symfony\Component\HttpFoundation\RedirectResponse('/');
