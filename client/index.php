@@ -17,7 +17,6 @@ if ($pos !== false) {
     $urlPath .= "client/";
 }
 
-$json = json_decode(file_get_contents('../game_data/questions.json'), true);
 $contestantsJson = json_decode(file_get_contents('../game_data/contestants.json'), true);
 
 $config = [];
