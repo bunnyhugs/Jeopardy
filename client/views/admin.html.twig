@@ -52,6 +52,12 @@
                 jeo.attemptBuzzerStatusChange($('#status-indicator').hasClass('inactive-buzzer'));
             });
 
+            $(document).keydown(function(event) {
+                if ((event.keyCode == 74) || (event.keyCode == 32)) {
+                    jeo.attemptBuzzerStatusChange($('#status-indicator').hasClass('inactive-buzzer'));
+                }
+            });
+
 			$('#timeout').click(function() {
 				jeo.attemptTimeout();
 			});
