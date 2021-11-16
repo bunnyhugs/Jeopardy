@@ -94,8 +94,8 @@ class BoardFactory
         $contestantsValues = json_decode($contestantsJson);
         $contestants = (new Collection($contestantsValues->contestants))->map([ $contestantFactory, 'createFromObject' ]);
 	
-        $categories1 = mapCategories($values[0]->categories);
-        $categories2 = mapCategories($values[1]->categories);
+        $categories1 = self::mapCategories($values[0]->categories);
+        $categories2 = self::mapCategories($values[1]->categories);
 
         if (!isset($values[1]->final)) {
             throw new \Exception("Final Jeopardy is not defined in your questions file");
