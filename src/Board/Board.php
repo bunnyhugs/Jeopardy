@@ -21,7 +21,7 @@ class Board
      * A collection of Categories.
      * @var Collection
      */
-    protected $categories[2];
+    protected $categories;
     protected $round;
 
     /**
