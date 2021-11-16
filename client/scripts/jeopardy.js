@@ -8,6 +8,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
     jeopardy.question_dismiss_topic = 'com.sc2ctl.jeopardy.question_dismiss';
     jeopardy.question_answer_topic = 'com.sc2ctl.jeopardy.question_answer';
     jeopardy.question_time_out_topic = 'com.sc2ctl.jeopardy.question_time_out';
+    jeopardy.question_refresh_topic = 'com.sc2ctl.jeopardy.question_refresh';
     jeopardy.contestant_score_topic = 'com.sc2ctl.jeopardy.contestant_score';
     jeopardy.daily_double_bet_topic = "com.sc2ctl.jeopardy.daily_double_bet";
     jeopardy.final_jeopardy_topic = "com.sc2ctl.jeopardy.final_jeopardy";
@@ -30,6 +31,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
             conn.subscribe(jeopardy.question_dismiss_topic, handleQuestionDismiss);
             conn.subscribe(jeopardy.question_answer_topic, handleQuestionAnswer);
             conn.subscribe(jeopardy.question_time_out_topic, handleQuestionTimeOutEvent);
+            conn.subscribe(jeopardy.question_refresh_topic, handleQuestionRefresh);
             conn.subscribe(jeopardy.contestant_score_topic, handleContestantScore);
             conn.subscribe(jeopardy.daily_double_bet_topic, handleDailyDoubleBet);
             conn.subscribe(jeopardy.final_jeopardy_topic, handleFinalJeopardy);
@@ -88,6 +90,10 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
 
     jeopardy.attemptTimeout = function () {
         conn.publish(jeopardy.question_time_out_topic, {}, [], [])
+    };
+
+    jeopardy.attemptRefresh = function () {
+        conn.publish(jeopardy.question_refresh_topic, {}, [], [])
     };
 
     jeopardy.attemptNewQuestionDisplay = function (categoryName, value) {
@@ -257,6 +263,30 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
         }
 
         showQuestion(jeopardy.getQuestionDisplayModal());
+    }
+
+
+    /**
+     * This function is called whenever we recieve any information in the question display topic.
+     *
+     * If we get an array, we will populate the board with it. If this is an individual question, we will display it
+     * in the modal or collect the daily double bet, depending on the type of question we received.
+     *
+     * @param topic
+     * @param data
+     */
+    function handleQuestionRefresh(topic, data)
+    {
+		location.reload();
+
+		// TODO: Redraw the board without a full refresh. Unfortunately clearQuestionBox()
+		// makes this more difficult.
+        data = JSON.parse(data);
+        // If we have recieved an array back, we're just starting up and want to populate the board with questions.
+        if (data instanceof Array) {
+            populateBoard(data);
+            return;
+        }
     }
 
     /**
@@ -557,7 +587,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
             var category_box = $(category_column).find('.category-name');
             category_box.html("<span>" + category_data.name + "</span>")
 
-            var questions_column = $(category_column).find('.question.box');
+            var questions_column = $(category_column).find('.questionC.box');
 
             var questions_data = category_data.questions;
             for (var j in questions_data) {

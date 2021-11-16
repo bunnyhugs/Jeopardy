@@ -12,6 +12,8 @@
             <br />
             <button class="button bad" id="modal-dismiss">Dismiss</button>
             <br />
+            <button class="button toggleRound" id="toggleRound">Toggle round</button>
+            <br />
             <button id="trigger-final" class="button facebook">Start Final</button>
         </div>
 
@@ -60,6 +62,10 @@
 
 			$('#timeout').click(function() {
 				jeo.attemptTimeout();
+			});
+
+			$('#toggleRound').click(function() {
+				jeo.attemptRefresh();
 			});
 
 			$('.question.box').click(function() {

@@ -318,6 +318,9 @@ a.player-choice{text-decoration:none;color:#000}
 .timeout.inverted-button,.button.timeout{background:purple;color:#fff}
 .timeout.inverted-button:hover,.button.timeout:hover{background:magenta}
 
+.toggleRound.inverted-button,.button.toggleRound{background:#333;color:#fff}
+.toggleRound.inverted-button:hover,.button.toggleRound:hover{background:#555}
+
 
 @media screen and (max-height:850px){.player-container .player .img-wrapper,.player-container .player .img-wrapper img{height:8rem}
 .jeopardy-board .category .box{font-size:150%}

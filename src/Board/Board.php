@@ -21,7 +21,7 @@ class Board
      * A collection of Categories.
      * @var Collection
      */
-    protected $categories;
+    protected $categories = [ ];
     protected $round;
 
     /**
@@ -180,5 +180,19 @@ class Board
         return $this->finalJeopardyState->getClue();
     }
 
+	
+	public function getRound()
+	{
+		return $this->round;
+	}
 
+	public function setRound($round)
+	{
+		return $this->round = $round;
+	}
+
+	public function toggleRound()
+	{
+	    return ($this->round == 0) ? $this->round = 1 : $this->round = 0;
+	}
 }
