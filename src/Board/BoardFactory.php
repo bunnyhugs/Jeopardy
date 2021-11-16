@@ -20,6 +20,34 @@ class BoardFactory
     protected $data_source;
     protected $game_data_path;
 
+	protected function mapCategories($categories)
+	{
+        $categoriesMap = array_map(
+            function (\stdClass $category) {
+                return new Category(
+                    $category->name,
+                    array_map(
+                        function (\stdClass $question) {
+                            $questionObj = new Question(
+                                new Clue($question->clue),
+                                new Answer($question->answer),
+                                $question->value,
+                                (isset($question->daily_double)) ? $question->daily_double : false,
+                                (isset($question->type)) ? $question->type : Question::CLUE_TYPE_DEFAULT
+                            );
+                            if ($questionObj->getClue() == null || (isset($question->used) && $question->used)) {
+                                $questionObj->setUsed(true);
+                            }
+                            return $questionObj;
+                        },
+                        $category->questions
+                    )
+                );
+            }, $categories
+        );
+		
+		return $categoriesMap;
+	}
 
     public function __construct($filename, $game_data_path = "game_data/", $data_source = self::JSON_SOURCE)
     {
@@ -146,34 +174,5 @@ class BoardFactory
 
         return $board;
     }
-
-	private function mapCategories($categories)
-	{
-        $categoriesMap = array_map(
-            function (\stdClass $category) {
-                return new Category(
-                    $category->name,
-                    array_map(
-                        function (\stdClass $question) {
-                            $questionObj = new Question(
-                                new Clue($question->clue),
-                                new Answer($question->answer),
-                                $question->value,
-                                (isset($question->daily_double)) ? $question->daily_double : false,
-                                (isset($question->type)) ? $question->type : Question::CLUE_TYPE_DEFAULT
-                            );
-                            if ($questionObj->getClue() == null || (isset($question->used) && $question->used)) {
-                                $questionObj->setUsed(true);
-                            }
-                            return $questionObj;
-                        },
-                        $category->questions
-                    )
-                );
-            }, $categories
-        );
-		
-		return $categoriesMap;
-	}
 
 }
