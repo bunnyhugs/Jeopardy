@@ -21,7 +21,8 @@ class Board
      * A collection of Categories.
      * @var Collection
      */
-    protected $categories;
+    protected $categories[2];
+    protected $round;
 
     /**
      * Our clue for final Jeopardy.
@@ -42,10 +43,12 @@ class Board
      * @param BuzzerStatus $buzzerStatus
      * @param FinalJeopardy\State $final
      */
-    function __construct($contestants, $categories, Resolver $resolver, BuzzerStatus $buzzerStatus, FinalJeopardy\State $final)
+    function __construct($contestants, $categories1, $categories2, Resolver $resolver, BuzzerStatus $buzzerStatus, FinalJeopardy\State $final)
     {
         $this->contestants = ($contestants instanceof Collection) ? $contestants : new Collection($contestants);
-        $this->categories = new Collection($categories);
+        $this->round = 0;
+		$this->categories[0] = new Collection($categories1);
+        $this->categories[1] = new Collection($categories2);
         $this->resolver = $resolver;
         $this->buzzerStatus = $buzzerStatus;
         $this->finalJeopardyState = $final;
@@ -131,7 +134,7 @@ class Board
 		echo "Category: " . $categoryName . ", value: " . $value . "\n";
 
         /** @var Category $category */
-        $category = $this->categories->first(function (Category $category) use ($categoryName) {
+        $category = $this->categories[$this->round]->first(function (Category $category) use ($categoryName) {
             return $category->getName() == $categoryName;
         });
 
@@ -164,7 +167,7 @@ class Board
      */
     public function getCategories()
     {
-        return $this->categories;
+        return $this->categories[$this->round];
     }
 
     public function getFinalJeopardy()

@@ -28,7 +28,6 @@ class BoardFactory
         $this->data_source = $data_source;
     }
 
-
     /**
      * Initializes a board based on the configured data source.
      *
@@ -67,35 +66,14 @@ class BoardFactory
         $contestantsValues = json_decode($contestantsJson);
         $contestants = (new Collection($contestantsValues->contestants))->map([ $contestantFactory, 'createFromObject' ]);
 	
-        $categories = array_map(
-            function (\stdClass $category) {
-                return new Category(
-                    $category->name,
-                    array_map(
-                        function (\stdClass $question) {
-                            $questionObj = new Question(
-                                new Clue($question->clue),
-                                new Answer($question->answer),
-                                $question->value,
-                                (isset($question->daily_double)) ? $question->daily_double : false,
-                                (isset($question->type)) ? $question->type : Question::CLUE_TYPE_DEFAULT
-                            );
-                            if ($questionObj->getClue() == null || (isset($question->used) && $question->used)) {
-                                $questionObj->setUsed(true);
-                            }
-                            return $questionObj;
-                        },
-                        $category->questions
-                    )
-                );
-            }, $values->categories
-        );
+        $categories1 = mapCategories($values[0]->categories);
+        $categories2 = mapCategories($values[1]->categories);
 
-        if (!isset($values->final)) {
+        if (!isset($values[1]->final)) {
             throw new \Exception("Final Jeopardy is not defined in your questions file");
         }
 
-        $finalJeopardyClue = new FinalJeopardyClue($values->final->category, $values->final->clue, $values->final->answer);
+        $finalJeopardyClue = new FinalJeopardyClue($values[1]->final->category, $values[1]->final->clue, $values[1]->final->answer);
         $finalJeopardyState = new State(
 			$finalJeopardyClue,
 			$contestants->map(function(Contestant $contestant) { return $contestant->getName(); })->toArray()
@@ -103,7 +81,8 @@ class BoardFactory
 
         $board = new Board(
             $contestants,
-            $categories,
+            $categories1,
+            $categories2,
             new Resolver(),
             new BuzzerStatus(),
             $finalJeopardyState
@@ -167,4 +146,34 @@ class BoardFactory
 
         return $board;
     }
+
+	private function mapCategories($categories)
+	{
+        $categoriesMap = array_map(
+            function (\stdClass $category) {
+                return new Category(
+                    $category->name,
+                    array_map(
+                        function (\stdClass $question) {
+                            $questionObj = new Question(
+                                new Clue($question->clue),
+                                new Answer($question->answer),
+                                $question->value,
+                                (isset($question->daily_double)) ? $question->daily_double : false,
+                                (isset($question->type)) ? $question->type : Question::CLUE_TYPE_DEFAULT
+                            );
+                            if ($questionObj->getClue() == null || (isset($question->used) && $question->used)) {
+                                $questionObj->setUsed(true);
+                            }
+                            return $questionObj;
+                        },
+                        $category->questions
+                    )
+                );
+            }, $categories
+        );
+		
+		return $categoriesMap;
+	}
+
 }
