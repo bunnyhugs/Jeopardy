@@ -10,6 +10,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
     jeopardy.question_time_out_topic = 'com.sc2ctl.jeopardy.question_time_out';
     jeopardy.question_refresh_topic = 'com.sc2ctl.jeopardy.question_refresh';
     jeopardy.contestant_score_topic = 'com.sc2ctl.jeopardy.contestant_score';
+    jeopardy.new_contestant_topic = 'com.sc2ctl.jeopardy.new_contestant';
     jeopardy.daily_double_bet_topic = "com.sc2ctl.jeopardy.daily_double_bet";
     jeopardy.final_jeopardy_topic = "com.sc2ctl.jeopardy.final_jeopardy";
     jeopardy.final_jeopardy_responses_topic = "com.sc2ctl.jeopardy.final_jeopardy_responses";
@@ -32,6 +33,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
             conn.subscribe(jeopardy.question_answer_topic, handleQuestionAnswer);
             conn.subscribe(jeopardy.question_time_out_topic, handleQuestionTimeOutEvent);
             conn.subscribe(jeopardy.question_refresh_topic, handleQuestionRefresh);
+            conn.subscribe(jeopardy.new_contestant_topic, handleNewContestant);
             conn.subscribe(jeopardy.contestant_score_topic, handleContestantScore);
             conn.subscribe(jeopardy.daily_double_bet_topic, handleDailyDoubleBet);
             conn.subscribe(jeopardy.final_jeopardy_topic, handleFinalJeopardy);
@@ -136,6 +138,13 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
         conn.publish(jeopardy.question_answer_topic, payload, [], []);
     };
 
+    jeopardy.attemptNewPlayer = function(playerName) {
+        var payload = {
+            contestant: playerName
+        };
+
+        conn.publish(jeopardy.new_contestant_topic, payload, [], []);
+    };
 
 
     jeopardy.attemptDailyDoubleBet = function (bet) {
@@ -345,6 +354,21 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
         }
     }
 
+
+    /**
+     * Called whenever we receive a new player
+     *
+     * This will be whenever a new custom name is entered from the entry page.
+     *
+     * @param topic
+     * @param data
+     */
+    function handleNewContestant(topic, data) {
+        data = JSON.parse(data);
+
+
+        updateContestants(data.name);
+    }
 
     /**
      * Called whenever we receive an update to the contestant score topic.
@@ -716,7 +740,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
      * @param add
      */
     function updateContestantScore(contestant, score, add) {
-		player = $(document).find("[data-player-name='" + contestant + "']");
+	player = $(document).find("[data-player-name='" + contestant + "']");
 		
         if (add) {
             var curScore = parseInt(player.find('.score').html());
@@ -725,8 +749,42 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
         player.find('.score').first().html(score);
     }
 
+
+    /**
+     * Updates the contestant list. Ignore if contestant already exists.
+     *
+     * @param contestant
+     */
+    function updateContestants(contestant) {
+
+	/*
+<div class="player-container">
+        <div class="{{ player }} player" data-player-name="{{ player }}" data-active-player="true">
+            <h2 style="display: inline; float:left; padding-left: 1em;">{{ player }}</h2>
+            <span class="score" style="float:right; padding-right: 1em;">{{ score }}</span>
+            <div style="clear:both;"></div>
+        </div>
+</div>
+	*/	
+	player = $(document).find("[data-player-name='" + contestant + "']");
+
+	if (player.length != 0) {
+	    console.log("Player " + contestant + " tried to add new self, but already exists.");
+	    return;
+	}
+
+	playerContainer = $('#player-container');
+
+	playerHtml = '<div class="' + contestant + ' player" data-player-name="' + contestant + '">';
+	playerHtml += '<h2 style="display: inline; float:left; padding-left: 1em;">' + contestant + '</h2>';
+	playerHtml += '<span class="score" style="float:right; padding-right: 1em;">0</span><div style="clear:both;"></div></div>';
+	playerContainer.append(playerHtml);
+    }
+
+
     return jeopardy;
 
     console.log("WEEEEEE");
 }((window.jeopardy || {}), window.buzzer, window.question));
+
 

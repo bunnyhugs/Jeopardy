@@ -329,3 +329,4 @@ a.player-choice{text-decoration:none;color:#000}
 
 div.answer div.content { background: #000 !important; color: #000 !important; }
 
+input.customName { margin-left: 1em; margin-right: 1em; }
