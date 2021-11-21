@@ -14,6 +14,7 @@ use Depotwarehouse\Jeopardy\Buzzer\BuzzerStatusChangeEvent;
 use Depotwarehouse\Jeopardy\Buzzer\BuzzerStatusSubscriptionEvent;
 use Depotwarehouse\Jeopardy\Buzzer\BuzzReceivedEvent;
 use Depotwarehouse\Jeopardy\Participant\Contestant;
+use Depotwarehouse\Jeopardy\Participant\ContestantJoinEvent;
 use Depotwarehouse\Jeopardy\Participant\ContestantScoreChangeEvent;
 use Depotwarehouse\Jeopardy\Participant\ContestantScoreSubscriptionEvent;
 use Illuminate\Support\Collection;
@@ -34,6 +35,7 @@ class WampConnector implements WampServerInterface
     const QUESTION_TIME_OUT_TOPIC = "com.sc2ctl.jeopardy.question_time_out";
     const QUESTION_REFRESH_TOPIC = "com.sc2ctl.jeopardy.question_refresh";
     const CONTESTANT_SCORE = "com.sc2ctl.jeopardy.contestant_score";
+    const CONTESTANT_JOIN_TOPIC = "com.sc2ctl.jeopardy.contestant_join";
     const DAILY_DOUBLE_BET_TOPIC = "com.sc2ctl.jeopardy.daily_double_bet";
     const FINAL_JEOPARDY_TOPIC = "com.sc2ctl.jeopardy.final_jeopardy";
     const FINAL_JEOPARDY_RESPONSES_TOPIC = "com.sc2ctl.jeopardy.final_jeopardy_responses";
@@ -123,6 +125,22 @@ class WampConnector implements WampServerInterface
                 $this->emitter->emit(new ContestantScoreChangeEvent($event['contestant'], $event['diff']));
                 break;
 
+            case self::CONTESTANT_JOIN_TOPIC:
+                if (!isset($event['contestant'])) {
+                    // TODO logging
+                    echo "Invalid parameters sent to update contestant score\n";
+                    print_r($event);
+                    break;
+                }
+
+	        echo "New contestant " . $event['contestant'] . "\n";
+
+                $contestant = new Contestant($event['contestant']);
+
+	        $this->emitter->emit(new ContestantJoinEvent($contestant));
+		//$this->emitter->emit(new ContestantScoreSubscriptionEvent($this->getSessionIdFromConnection($conn)));
+	        break;
+
             case self::QUESTION_DISPLAY_TOPIC:
                 if (!isset($event['category']) || !isset($event['value'])) {
                     //TODO log this
@@ -156,16 +174,16 @@ class WampConnector implements WampServerInterface
 
                 break;
 
-			case self::QUESTION_TIME_OUT_TOPIC:
-				echo "beep beep beep\n";
-				$this->emitter->emit(new QuestionTimeOutSubscriptionEvent(0));
-				break;
+            case self::QUESTION_TIME_OUT_TOPIC:
+                echo "beep beep beep\n";
+                $this->emitter->emit(new QuestionTimeOutSubscriptionEvent(0));
+                break;
 	    
-			case self::QUESTION_REFRESH_TOPIC:
-				echo "toggle round and refresh\n";
-				$this->emitter->emit(new QuestionRefreshSubscriptionEvent(0));
-				break;
-	    
+            case self::QUESTION_REFRESH_TOPIC:
+	        echo "toggle round and refresh\n";
+                $this->emitter->emit(new QuestionRefreshSubscriptionEvent(0));
+	        break;
+		
             case self::QUESTION_DISMISS_TOPIC:
                 if (!isset($event['category']) || !isset($event['value'])) {
                     //TODO log this
@@ -321,6 +339,29 @@ class WampConnector implements WampServerInterface
     }
 
     /**
+     * When a user joins, everyone should get and update their list of contestants
+     *
+     * @param Collection $contestants A collection containing Contestant objects
+     * @param string $sessionId The session ID of the user who subscribed.
+     */
+
+    public function onContestantJoin(Contestant $contestant)
+    {
+        if (!array_key_exists(self::CONTESTANT_JOIN_TOPIC, $this->subscribedTopics)) {
+	    echo "not subscribed to contestantJoin\n";
+
+            return;
+        }
+
+	// echo "broadcast contestantJoin\n";
+	
+        $response = $contestant->toJson();
+
+        $this->subscribedTopics[self::CONTESTANT_JOIN_TOPIC]->broadcast($response, [], []);
+    }
+
+
+    /**
      * When a user subscribes to the Contestant Score feed, they should get and update of all the current contestants
      *
      * @param Collection $contestants A collection containing Contestant objects
@@ -328,7 +369,9 @@ class WampConnector implements WampServerInterface
      */
     public function onContestantScoreSubscription(Collection $contestants, $sessionId)
     {
+	echo "onContestantScoreSubscription\n";
         if (!array_key_exists(self::CONTESTANT_SCORE, $this->subscribedTopics)) {
+	    echo "not subscribed\n";
             return;
         }
 
@@ -336,6 +379,8 @@ class WampConnector implements WampServerInterface
             return $contestant->toArray();
         })->toJson();
 
+	// echo $response . "\n";
+	// echo "broadcasting\n";
         $this->subscribedTopics[self::CONTESTANT_SCORE]->broadcast($response, [ ], [ $sessionId ]);
     }
 
@@ -487,10 +532,14 @@ class WampConnector implements WampServerInterface
             return;
         }
 
-        $requestedData = ucfirst($requestType);
+        // $requestedData = ucfirst($requestType);
+        $requestedData = ($requestType);
         $data = call_user_func([ $finalJeopardyClue, "get{$requestedData}" ]);
 
         $response = json_encode([ $requestType => $data ]);
+
+	// echo "onFinalJeopardyRequest\n";
+	// echo $response . "\n";
 
         $this->subscribedTopics[self::FINAL_JEOPARDY_TOPIC]->broadcast($response);
     }
@@ -505,6 +554,9 @@ class WampConnector implements WampServerInterface
             'content' => "bet"
         ]);
 
+	// echo "onFinalJeopardyBetCollectionRequest\n";
+	// echo $response . "\n";
+	
         $this->subscribedTopics[self::FINAL_JEOPARDY_RESPONSES_TOPIC]->broadcast($response);
     }
 
@@ -518,6 +570,9 @@ class WampConnector implements WampServerInterface
             'content' => 'answer'
         ]);
 
+	// echo " onFinalJeopardyAnswerCollectionRequest\n";
+	// echo $response . "\n";
+	
         $this->subscribedTopics[self::FINAL_JEOPARDY_RESPONSES_TOPIC]->broadcast($response);
     }
 
@@ -526,6 +581,9 @@ class WampConnector implements WampServerInterface
         if (!array_key_exists(self::FINAL_JEOPARDY_ANSWER_TOPIC, $this->subscribedTopics)) {
             return;
         }
+
+	// echo " onFinalJeopardyResponse\n";
+	// echo $response->toJson() . "\n";
 
         $this->subscribedTopics[self::FINAL_JEOPARDY_ANSWER_TOPIC]->broadcast($response->toJson());
     }

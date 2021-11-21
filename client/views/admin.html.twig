@@ -79,7 +79,7 @@
                 jeopardy.attemptQuestionDismiss();
             });
 
-            $('.player').click(function() {
+            $('.player-container').on('click', '.player', function() {
                 var playerName = $(this).attr('data-player-name');
                 var modal = jeo.getQuestionDisplayModal();
 
@@ -96,7 +96,7 @@
 
             });
 
-            $('.player').bind('contextmenu', function() {
+            $('.player-container').on('contextmenu', '.player', function() {
                 var playerName = $(this).attr('data-player-name');
                 var modal = jeo.getQuestionDisplayModal();
 
@@ -134,7 +134,7 @@
                 jeo.attemptFinalJeopardyDisplay(current_step);
             });
 
-            $('.responses .response').click(function() {
+            $('#final-jeopardy-display-modal').on('click', '.responses .response', function() {
                 jeo.attemptGetFinalJeopardyAnswer($(this).attr('data-player'));
                 return false;
             });

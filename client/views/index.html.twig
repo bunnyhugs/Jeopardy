@@ -12,13 +12,26 @@
             </a>
         {% endfor %}
                 <div class="player-select">
+		     <form id="customNameForm" action="#">
 		    Other: <input class="customName" id="customName" type="text" />
-                    <button class="customName" value="Join">Join</button>
+                    <input type="submit" class="customName" id="joinNew" value="Join"/></form>
                 </div>
 
         <hr />
 
         <h1><a href="{{ path }}obs">I'm just watching</a></h1>
     </div>
+
+    <script>
+        var jeo = window.jeopardy;
+        $(document).ready(function() {
+            $('#customNameForm').submit(function() {
+	        name = $('#customName').val();
+                jeo.attemptContestantJoin(name);
+		$(this).attr('action', '{{ path}}play/' + name);
+		return true;
+            });
+	});
+    </script>
 
 {% endblock %}

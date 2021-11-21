@@ -28,6 +28,7 @@ use Depotwarehouse\Jeopardy\Buzzer\BuzzerStatusSubscriptionEvent;
 use Depotwarehouse\Jeopardy\Buzzer\BuzzReceivedEvent;
 use Depotwarehouse\Jeopardy\Buzzer\Resolver;
 use Depotwarehouse\Jeopardy\Participant\Contestant;
+use Depotwarehouse\Jeopardy\Participant\ContestantJoinEvent;
 use Depotwarehouse\Jeopardy\Participant\ContestantScoreChangeEvent;
 use Depotwarehouse\Jeopardy\Participant\ContestantScoreSubscriptionEvent;
 use League\Event\Emitter;
@@ -101,6 +102,20 @@ class Server
         $emitter->addListener(ContestantScoreSubscriptionEvent::class, function(ContestantScoreSubscriptionEvent $event) use ($wamp, $board) {
             $wamp->onContestantScoreSubscription($board->getContestants(), $event->getSessionId());
         });
+
+        $emitter->addListener(ContestantJoinEvent::class, function(ContestantJoinEvent $event) use ($wamp, $board) {
+		// echo "adding new contestant\n";
+		// add to our server's list of contestants
+		$result = $board->addContestant($event->getContestant());
+		if ($result === null) {
+		    // TODO: contestant already exists, don't add
+		    echo "contestant not added, already existed\n";
+		    return;
+		}
+		// let everyone know
+		$wamp->onContestantJoin($event->getContestant());
+		$wamp->onContestantScoreSubscription($board->getContestants(), 0);
+	    });
 
         $emitter->addListener(BuzzerStatusSubscriptionEvent::class, function(BuzzerStatusSubscriptionEvent $event) use ($wamp, $board) {
             $wamp->onBuzzerStatusChange($board->getBuzzerStatus(), [], [ $event->getSessionId() ]);

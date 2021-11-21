@@ -36,6 +36,14 @@ class State
         }
     }
 
+    public function addContestant($contestant)
+    {
+        $this->contestants[$contestant] = [ ];
+	// echo "\nFinal Jeopardy contestants: \n";
+	// echo json_encode($this->contestants);
+	// echo "\n************\n";
+    }
+    
     public function setBet($contestant, $bet)
     {
         if (!array_key_exists($contestant, $this->contestants)) {

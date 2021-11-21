@@ -13,7 +13,8 @@ class ContestantFactory
      */
     public function createFromObject($object)
     {
-        $name = ucfirst(strtolower($object->name));
+        // $name = ucfirst(strtolower($object->name));
+        $name = $object->name;
         $score = (isset($object->score) ? $object->score : 0);
         return new Contestant($name, $score);
     }

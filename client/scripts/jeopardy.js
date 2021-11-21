@@ -9,17 +9,18 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
     jeopardy.question_answer_topic = 'com.sc2ctl.jeopardy.question_answer';
     jeopardy.question_time_out_topic = 'com.sc2ctl.jeopardy.question_time_out';
     jeopardy.question_refresh_topic = 'com.sc2ctl.jeopardy.question_refresh';
+    jeopardy.contestant_join_topic = 'com.sc2ctl.jeopardy.contestant_join';
     jeopardy.contestant_score_topic = 'com.sc2ctl.jeopardy.contestant_score';
-    jeopardy.new_contestant_topic = 'com.sc2ctl.jeopardy.new_contestant';
     jeopardy.daily_double_bet_topic = "com.sc2ctl.jeopardy.daily_double_bet";
     jeopardy.final_jeopardy_topic = "com.sc2ctl.jeopardy.final_jeopardy";
     jeopardy.final_jeopardy_responses_topic = "com.sc2ctl.jeopardy.final_jeopardy_responses";
     jeopardy.final_jeopardy_answer_topic = "com.sc2ctl.jeopardy.final_jeopardy_answers";
 
     jeopardy.host = 'ws://' + window.location.hostname + '/ws';
-    jeopardy.buzz_display_time = 4500;
+    jeopardy.buzz_display_time = 6500;
     jeopardy.admin_mode = false; // Sets admin mode, which will disable feedback like penalties, buzzbuttons, etc.
 
+    jeopardy.user = '';
 
     var final_jeopardy_response = null;
 
@@ -33,7 +34,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
             conn.subscribe(jeopardy.question_answer_topic, handleQuestionAnswer);
             conn.subscribe(jeopardy.question_time_out_topic, handleQuestionTimeOutEvent);
             conn.subscribe(jeopardy.question_refresh_topic, handleQuestionRefresh);
-            conn.subscribe(jeopardy.new_contestant_topic, handleNewContestant);
+            conn.subscribe(jeopardy.contestant_join_topic, handleContestantJoin);
             conn.subscribe(jeopardy.contestant_score_topic, handleContestantScore);
             conn.subscribe(jeopardy.daily_double_bet_topic, handleDailyDoubleBet);
             conn.subscribe(jeopardy.final_jeopardy_topic, handleFinalJeopardy);
@@ -62,6 +63,12 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
 
     /* Our public API */
 
+    jeopardy.setUser = function (name) {
+	return jeopardy.user = name;
+    }
+
+    jeopardy.getUser = function () { return jeopardy.user; }
+    
     jeopardy.attemptBuzz = function (name) {
 
         var difference = buzzer.buzz();
@@ -138,12 +145,12 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
         conn.publish(jeopardy.question_answer_topic, payload, [], []);
     };
 
-    jeopardy.attemptNewPlayer = function(playerName) {
+    jeopardy.attemptContestantJoin = function(playerName) {
         var payload = {
             contestant: playerName
         };
 
-        conn.publish(jeopardy.new_contestant_topic, payload, [], []);
+        conn.publish(jeopardy.contestant_join_topic, payload, [], []);
     };
 
 
@@ -363,7 +370,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
      * @param topic
      * @param data
      */
-    function handleNewContestant(topic, data) {
+    function handleContestantJoin(topic, data) {
         data = JSON.parse(data);
 
 
@@ -567,7 +574,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
 
         var players = jeopardy.getPlayerElements();
         for (var i in players) {
-            if ($(players[i]).hasClass(playerName)) {
+            if ($(players[i]).data('playerName').toUpperCase() == playerName.toUpperCase()) {
                 $(players[i]).addClass('buzz');
 
                 setTimeout(clearPlayerBuzzes, jeopardy.buzz_display_time)
@@ -740,12 +747,13 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
      * @param add
      */
     function updateContestantScore(contestant, score, add) {
+	updateContestants(contestant);
 	player = $(document).find("[data-player-name='" + contestant + "']");
-		
+	
         if (add) {
             var curScore = parseInt(player.find('.score').html());
             score = curScore + parseInt(score);
-        }
+	}
         player.find('.score').first().html(score);
     }
 
@@ -765,9 +773,17 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
             <div style="clear:both;"></div>
         </div>
 </div>
-	*/	
+	*/
+	
 	player = $(document).find("[data-player-name='" + contestant + "']");
-
+	active = "";
+	
+	if (contestant.toUpperCase() == jeopardy.getUser().toUpperCase()) {
+	    // set active player
+	    // player.data('active-player', 'true');
+	    active = ' data-active-player="true" ';
+	}
+	
 	if (player.length != 0) {
 	    console.log("Player " + contestant + " tried to add new self, but already exists.");
 	    return;
@@ -775,10 +791,17 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
 
 	playerContainer = $('#player-container');
 
-	playerHtml = '<div class="' + contestant + ' player" data-player-name="' + contestant + '">';
+	playerHtml = '<div class="' + contestant + ' player" data-player-name="' + contestant + '" ' + active + ' >';
 	playerHtml += '<h2 style="display: inline; float:left; padding-left: 1em;">' + contestant + '</h2>';
 	playerHtml += '<span class="score" style="float:right; padding-right: 1em;">0</span><div style="clear:both;"></div></div>';
 	playerContainer.append(playerHtml);
+
+
+        if (jeopardy.admin_mode) {
+	    responsesElement = $('#final-jeopardy-display-modal div.responses');
+	    responsesHtml = '<div class="response" data-player="' + contestant + '">' + contestant + '</div>';
+	    responsesElement.append(responsesHtml);
+	}	
     }
 
 

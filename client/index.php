@@ -21,7 +21,9 @@ $contestantsJson = json_decode(file_get_contents('../game_data/contestants.json'
 
 $config = [];
 $config['players'] = array_map(function(array $contestant_info) {
-    return ucfirst(strtolower($contestant_info['name']));
+	//    return ucfirst(strtolower($contestant_info['name']));
+	return ($contestant_info['name']);
+
 }, $contestantsJson['contestants']);
 
 $config['display_host'] = false;
@@ -75,10 +77,12 @@ $router->get('/contestants', function (Request $request, Response $response, arr
 });
 
 $router->get('/play/{player}', function (Request $request, Response $response, array $args) use ($twig, $config) {
-    $player = urldecode(ucfirst(strtolower($args['player'])));
+	//    $player = urldecode(ucfirst(strtolower($args['player'])));
+    $player = urldecode($args['player']);
 
     if (!in_array($player, $config['players'])) {
-        return new \Symfony\Component\HttpFoundation\RedirectResponse('/');
+	// TODO: handle unknown players
+        // return new \Symfony\Component\HttpFoundation\RedirectResponse('/');
     }
     $response->setContent($twig->render('play.html.twig', [ 'players' => $config['players'], 'user' => $player, 'path' => $config['path'] ]));
     return $response;

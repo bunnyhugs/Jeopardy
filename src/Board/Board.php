@@ -162,6 +162,24 @@ class Board
         return $this->contestants;
     }
 
+    public function addContestant(Contestant $contestant)
+    {
+	$c = $this->getContestants()->first(function(Contestant $c) use ($contestant) {
+            return $c->getName() == $contestant->getName();
+        });
+
+        if ($c != null) {
+            //TODO logging.
+            echo "Contestant with name {$contestant->getName()} already exists";
+	    return false;
+        }
+
+	// echo "adding contestant to board\n";
+	$this->contestants->push($contestant);
+	$this->getFinalJeopardy()->addContestant($contestant->getName());
+	return $this->contestants;
+    }
+    
     /**
      * @return Collection
      */
