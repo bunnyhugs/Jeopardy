@@ -369,7 +369,7 @@ class WampConnector implements WampServerInterface
      */
     public function onContestantScoreSubscription(Collection $contestants, $sessionId)
     {
-	echo "onContestantScoreSubscription\n";
+	// echo "onContestantScoreSubscription\n";
         if (!array_key_exists(self::CONTESTANT_SCORE, $this->subscribedTopics)) {
 	    echo "not subscribed\n";
             return;
