@@ -1,3 +1,9 @@
 .idea/
 vendor/
 node_modules/
+game_data/
+game_data_old/
+parser/
+game_data
+game_data/contestants.json
+game_data/local-search-summit.json

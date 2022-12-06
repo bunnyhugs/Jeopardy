@@ -37,6 +37,7 @@ use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\Wamp\WampServer;
 use Ratchet\WebSocket\WsServer;
+use Ratchet\WebSocket\WssServer;
 use React\EventLoop\Factory;
 use React\EventLoop\LoopInterface;
 

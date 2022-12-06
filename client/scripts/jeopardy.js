@@ -16,7 +16,7 @@ window.jeopardy = (function (jeopardy, buzzer, question) {
     jeopardy.final_jeopardy_responses_topic = "com.sc2ctl.jeopardy.final_jeopardy_responses";
     jeopardy.final_jeopardy_answer_topic = "com.sc2ctl.jeopardy.final_jeopardy_answers";
 
-    jeopardy.host = 'ws://' + window.location.hostname + '/ws';
+    jeopardy.host = 'wss://' + 'wss.youalberta.ca' + '/ws';
     jeopardy.buzz_display_time = 6500;
     jeopardy.admin_mode = false; // Sets admin mode, which will disable feedback like penalties, buzzbuttons, etc.
 
