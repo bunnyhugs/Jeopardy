@@ -8,9 +8,18 @@
 
             <button class="button" id="toggle-status">Toggle</button>
             <br />
+            <button class="button timeout" id="timeout">Time out</button>
+            <br />
             <button class="button bad" id="modal-dismiss">Dismiss</button>
             <br />
-            <button id="trigger-final" class="button facebook">Start Final</button>
+            <button class="button toggleRound" id="toggleRound">Toggle round</button>
+            <br />
+            <button id="trigger-final" class="button facebook">Start Final (R-click)</button>
+            <br />
+            <p>
+				<label for="gameId" style="color: #fff;">Game ID: </label><input type="text" size="5" id="gameId" /> <br />
+				<button value="server?game=" id="loadGame" class="button">Load Game ID (R-click)</button>
+			</p>
         </div>
 
         {% include 'partials/contestants.html.twig' with {'players': players, 'user': user, 'show_image': false } %}
@@ -50,7 +59,21 @@
                 jeo.attemptBuzzerStatusChange($('#status-indicator').hasClass('inactive-buzzer'));
             });
 
-            $('.question.box').click(function() {
+            $(document).keydown(function(event) {
+                if ((event.keyCode == 74) || (event.keyCode == 32)) {
+                    jeo.attemptBuzzerStatusChange($('#status-indicator').hasClass('inactive-buzzer'));
+                }
+            });
+
+			$('#timeout').click(function() {
+				jeo.attemptTimeout();
+			});
+
+			$('#toggleRound').click(function() {
+				jeo.attemptRefresh();
+			});
+
+			$('.question.box').click(function() {
                 var categoryName = $(this).attr('data-category');
                 var value = $(this).find('.clue').first().text();
 
@@ -61,7 +84,20 @@
                 jeopardy.attemptQuestionDismiss();
             });
 
-            $('.player').click(function() {
+            $('#loadGame').bind('contextmenu', function() {
+                if ($('#gameId').val().length > 2) {
+					let currentPath = window.location.pathname;
+					let lastSlashIndex = currentPath.lastIndexOf('/');
+					let pathUpToLastSlash = currentPath.substring(0, lastSlashIndex + 1);
+
+					// Construct the new URL with the desired query parameter
+					let newURL = pathUpToLastSlash + $('#loadGame').val() + $('#gameId').val();
+					// window.location.href = newURL;
+					window.open(newURL, '_blank');
+				}
+            });
+
+            $('.player-container').on('click', '.player', function() {
                 var playerName = $(this).attr('data-player-name');
                 var modal = jeo.getQuestionDisplayModal();
 
@@ -78,7 +114,7 @@
 
             });
 
-            $('.player').bind('contextmenu', function() {
+            $('.player-container').on('contextmenu', '.player', function() {
                 var playerName = $(this).attr('data-player-name');
                 var modal = jeo.getQuestionDisplayModal();
 
@@ -107,11 +143,16 @@
             });
 
             $('#final-jeopardy-next').click(function() {
-                var current_step = $(this).attr('data-current-step');
+				var current_step = $(this).attr('data-current-step');
+				if (current_step == "clue") {
+					$(this).html("Clue displayed, wait 30s for answers");
+				} else if (current_step == "answer") {
+					$(this).html("Answers closed, gathering responses");
+				}
                 jeo.attemptFinalJeopardyDisplay(current_step);
             });
 
-            $('.responses .response').click(function() {
+            $('#final-jeopardy-display-modal').on('click', '.responses .response', function() {
                 jeo.attemptGetFinalJeopardyAnswer($(this).attr('data-player'));
                 return false;
             });

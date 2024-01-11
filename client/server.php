@@ -2,7 +2,11 @@
 
 require 'vendor/autoload.php';
 
-chdir( __DIR__ );
+$gameId = filter_input(INPUT_GET, 'game', FILTER_SANITIZE_STRING);
+
+if (isset($gameId)) {
+	echo $gameId;
+}
 
 $question_filename = isset($argv[1]) ? $argv[1] : "questions";
 
