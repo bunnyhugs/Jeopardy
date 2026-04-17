@@ -74,7 +74,7 @@ $router->get('/server', function (Request $request, Response $response, array $a
 			} else {
 				exec($cmd . " > /dev/null &");  
 			}
-			  $cmd = 'C:\apache24\php\php.exe ..\server.php ' . escapeshellarg($gameId) . ' >NUL 2>NUL';
+			  $cmd = 'C:\apache24\php7.4\php.exe ..\server.php ' . escapeshellarg($gameId) . ' >NUL 2>NUL';
 			if (substr(php_uname(), 0, 7) == "Windows") {
 				$content .= ' running ' . $cmd . '<br>';
 				pclose(popen("start /B " . $cmd, "r"));
