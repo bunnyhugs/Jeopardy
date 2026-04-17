@@ -20,7 +20,14 @@
 				<label for="gameId" style="color: #fff;">Game ID: </label><input type="text" size="5" id="gameId" /> <br />
 				<button value="server?game=" id="loadGame" class="button">Load Game ID (R-click)</button>
 			</p>
+			<p style="color: #fff;">Type game ID (1 to 9500+ from https://j-archive.com/showgame.php?game_id=7234) 
+			and right click to load data and start server. Reload this page.<br /><br />
+			Type any non-numeric and right click to kill server.<br /><br />
+			Press space to toggle buzzer status.<br /><br />
+			Left click user to add score; right click to subtract score.<br />
+			Left-click blackout to reveal answer. </p>
         </div>
+
 
         {% include 'partials/contestants.html.twig' with {'players': players, 'user': user, 'show_image': false } %}
 
